@@ -3,334 +3,979 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS LU — Бесплатная подготовка</title>
+    <title>IELTS Suluu — Красивая и эффективная подготовка</title>
+    <!-- Подключаем Tailwind CSS v4 для стильного UI -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Иконки и шрифты -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .accent-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Красивый кастомный скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+
+        /* Пульсирующие волны для микрофона */
+        .wave-bar {
+            animation: quiet 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes quiet {
+            0% { transform: scaleY(0.2); }
+            100% { transform: scaleY(1); }
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
 
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <!-- ГЛАВНАЯ НАВИГАЦИЯ -->
+    <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold text-xl tracking-wider">IL</div>
-                <span class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">IELTS LU</span>
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showTab('dashboard')">
+                <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl tracking-wider shadow-lg shadow-indigo-500/20">IS</div>
+                <div>
+                    <span class="text-xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">IELTS Suluu</span>
+                    <span class="block text-[10px] uppercase tracking-widest text-slate-500 font-bold -mt-1">Beautiful Prep</span>
+                </div>
             </div>
-            <nav class="hidden md:flex space-x-8 text-sm font-medium">
-                <a href="#sections" class="text-slate-300 hover:text-indigo-400 transition">Секции</a>
-                <a href="#ai-assistant" class="text-slate-300 hover:text-indigo-400 transition">ИИ-Помощник</a>
-                <a href="#simulator" class="text-slate-300 hover:text-indigo-400 transition">Практика</a>
+            
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-400">
+                <button onclick="showTab('dashboard')" id="nav-dashboard" class="nav-link text-indigo-400 hover:text-white transition">Панель</button>
+                <button onclick="showTab('modules')" id="nav-modules" class="nav-link hover:text-white transition">Секции</button>
+                <button onclick="showTab('diagnostic')" id="nav-diagnostic" class="nav-link hover:text-white transition">Диагностика <span class="bg-pink-500/10 text-pink-400 text-[9px] px-1.5 py-0.5 rounded-full ml-1">Тест</span></button>
+                <button onclick="showTab('ai')" id="nav-ai" class="nav-link hover:text-white transition">ИИ-Тьютор</button>
             </nav>
-            <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center space-x-2">
-                <i class="fas fa-trophy text-amber-400"></i>
-                <span class="text-sm font-semibold">Ваш Счёт: <span id="user-score" class="text-indigo-400">0</span> XP</span>
+
+            <div class="flex items-center space-x-4">
+                <div class="bg-slate-900/90 border border-slate-800/80 px-4 py-2 rounded-2xl flex items-center space-x-2 shadow-inner">
+                    <i class="fas fa-bolt text-amber-400 animate-pulse"></i>
+                    <span class="text-sm font-bold"><span id="user-score" class="text-indigo-400">0</span> <span class="text-slate-500 text-xs font-normal">XP</span></span>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-16">
+    <!-- ОСНОВНОЙ КОНТЕНТ (SPA С КЛИЕНТСКИМ РОУТИНГОМ) -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-12">
 
-        <section class="text-center py-12 space-y-4">
-            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">
-                Прокачай свой <span class="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">IELTS на 8.5+</span> бесплатно
-            </h1>
-            <p class="text-slate-400 max-w-2xl mx-auto text-lg">
-                Эффективная интерактивная платформа для тренировки всех навыков с умным ИИ-наставником.
-            </p>
-        </section>
+        <!-- ВКЛАДКА 1: ПАНЕЛЬ УПРАВЛЕНИЯ (DASHBOARD) -->
+        <section id="tab-dashboard" class="tab-content space-y-12">
+            <!-- Hero баннер -->
+            <div class="relative bg-gradient-to-br from-slate-900 via-indigo-950/20 to-slate-950 border border-slate-900 rounded-3xl p-8 md:p-12 overflow-hidden shadow-2xl">
+                <div class="absolute -right-12 -bottom-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                <div class="absolute -left-12 -top-12 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+                
+                <div class="max-w-2xl space-y-6 relative z-10">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-300 text-xs font-bold rounded-full border border-indigo-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Онлайн платформа
+                    </span>
+                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight accent-font">
+                        Сделай свой путь к <span class="bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">IELTS 8.5</span> красивым
+                    </h1>
+                    <p class="text-slate-400 text-base md:text-lg leading-relaxed">
+                        Добро пожаловать в <strong>IELTS Suluu</strong> — эстетичное пространство с умными интерактивными тренажерами, симуляцией устной речи и мгновенным ИИ-анализом.
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <button onclick="showTab('diagnostic')" class="px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                            Пройти диагностику <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                        </button>
+                        <button onclick="showTab('modules')" class="px-6 py-3.5 bg-slate-900 hover:bg-slate-850 text-slate-300 rounded-2xl font-bold border border-slate-800 transition-all">
+                            Начать практику
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-        <section id="sections" class="space-y-6">
-            <h2 class="text-2xl font-bold border-l-4 border-indigo-500 pl-3">Доступные модули</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl hover:border-indigo-500 transition group flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center mb-4 text-xl">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Reading</h3>
-                        <p class="text-slate-400 text-sm mb-4">Анализ текстов, стратегии Skimming & Scanning, разбор сложных академических статей.</p>
+            <!-- Сводка прогресса -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900/40 border border-slate-900 p-6 rounded-2xl flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl">
+                        <i class="fas fa-graduation-cap"></i>
                     </div>
-                    <button onclick="startPractice('Reading')" class="w-full py-2 bg-slate-700 group-hover:bg-indigo-600 text-white rounded-xl text-sm font-medium transition mt-4">Начать (+20 XP)</button>
+                    <div>
+                        <span class="block text-slate-500 text-xs uppercase font-bold">Текущий уровень</span>
+                        <span id="stat-level" class="text-lg font-extrabold text-slate-200">Не определен</span>
+                    </div>
                 </div>
-                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl hover:border-indigo-500 transition group flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-4 text-xl">
-                            <i class="fas fa-headphones"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Listening</h3>
-                        <p class="text-slate-400 text-sm mb-4">Восприятие на слух акцентов (UK, US, AUS), заполнение карт, таблиц и заметок.</p>
+                <div class="bg-slate-900/40 border border-slate-900 p-6 rounded-2xl flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">
+                        <i class="fas fa-star"></i>
                     </div>
-                    <button onclick="startPractice('Listening')" class="w-full py-2 bg-slate-700 group-hover:bg-indigo-600 text-white rounded-xl text-sm font-medium transition mt-4">Начать (+20 XP)</button>
+                    <div>
+                        <span class="block text-slate-500 text-xs uppercase font-bold">Очки подготовки (XP)</span>
+                        <span id="stat-xp" class="text-lg font-extrabold text-slate-200">0 XP</span>
+                    </div>
                 </div>
-                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl hover:border-indigo-500 transition group flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-4 text-xl">
-                            <i class="fas fa-pen-nib"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Writing</h3>
-                        <p class="text-slate-400 text-sm mb-4">Шаблоны для Task 1 (графики) и Task 2 (эссе). Анализ структуры и критериев оценки.</p>
+                <div class="bg-slate-900/40 border border-slate-900 p-6 rounded-2xl flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center text-xl">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <button onclick="startPractice('Writing')" class="w-full py-2 bg-slate-700 group-hover:bg-indigo-600 text-white rounded-xl text-sm font-medium transition mt-4">Начать (+30 XP)</button>
-                </div>
-                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-2xl hover:border-indigo-500 transition group flex flex-col justify-between">
                     <div>
-                        <div class="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center mb-4 text-xl">
-                            <i class="fas fa-gavel"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Grammar & Vocab</h3>
-                        <p class="text-slate-400 text-sm mb-4">Продвинутая грамматика: Complex Sentences, Conditionals, и идиомы для Band 7+.</p>
+                        <span class="block text-slate-500 text-xs uppercase font-bold">Экзаменационный балл</span>
+                        <span id="stat-band" class="text-lg font-extrabold text-pink-400">— / 9.0</span>
                     </div>
-                    <button onclick="startPractice('Grammar')" class="w-full py-2 bg-slate-700 group-hover:bg-indigo-600 text-white rounded-xl text-sm font-medium transition mt-4">Начать (+15 XP)</button>
                 </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <section id="simulator" class="lg:col-span-2 bg-slate-800/30 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Интерактивный симулятор</h2>
-                        <span id="current-module-badge" class="px-3 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-full uppercase tracking-wider">Выберите модуль</span>
+
+        <!-- ВКЛАДКА 2: СЕКЦИИ И ТРЕНАЖЕРЫ (MODULES) -->
+        <section id="tab-modules" class="tab-content hidden space-y-8">
+            <div class="space-y-2">
+                <h2 class="text-3xl font-bold tracking-tight accent-font">Секционные модули</h2>
+                <p class="text-slate-400 text-sm">Выбирайте навыки, которые хотите прокачать сегодня. Каждая секция начисляет XP.</p>
+            </div>
+
+            <!-- Сетка карточек модулей -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- Reading -->
+                <div onclick="initModulePractice('Reading')" class="module-card cursor-pointer bg-slate-900/30 hover:bg-slate-900/60 border border-slate-900 hover:border-indigo-500/40 p-6 rounded-2xl transition-all duration-300 group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-1 group-hover:text-indigo-400 transition">Reading</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">Понимание текстов, True/False/Not Given и разбор контекста.</p>
                     </div>
-                    
-                    <div id="welcome-practice-msg" class="text-center py-12 text-slate-500">
-                        <i class="fas fa-graduation-cap text-5xl mb-4 block"></i>
-                        Выберите любую секцию выше, чтобы запустить практическое задание с подсчетом баллов.
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-400 mt-4">Начать <i class="fas fa-chevron-right text-[9px] group-hover:translate-x-1 transition-transform"></i></span>
+                </div>
+                <!-- Listening -->
+                <div onclick="initModulePractice('Listening')" class="module-card cursor-pointer bg-slate-900/30 hover:bg-slate-900/60 border border-slate-900 hover:border-cyan-500/40 p-6 rounded-2xl transition-all duration-300 group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                            <i class="fas fa-headphones"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-1 group-hover:text-cyan-400 transition">Listening</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">Восприятие акцентов, заполнение пропусков и ключевые фразы.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-400 mt-4">Начать <i class="fas fa-chevron-right text-[9px] group-hover:translate-x-1 transition-transform"></i></span>
+                </div>
+                <!-- Writing -->
+                <div onclick="initModulePractice('Writing')" class="module-card cursor-pointer bg-slate-900/30 hover:bg-slate-900/60 border border-slate-900 hover:border-emerald-500/40 p-6 rounded-2xl transition-all duration-300 group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                            <i class="fas fa-pen-nib"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-1 group-hover:text-emerald-400 transition">Writing</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">Связующие слова, структура Academic эссе (Task 1 & 2).</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 mt-4">Начать <i class="fas fa-chevron-right text-[9px] group-hover:translate-x-1 transition-transform"></i></span>
+                </div>
+                <!-- Speaking -->
+                <div onclick="initSpeakingPractice()" class="module-card cursor-pointer bg-slate-900/30 hover:bg-slate-900/60 border border-slate-900 hover:border-rose-500/40 p-6 rounded-2xl transition-all duration-300 group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-1 group-hover:text-rose-400 transition">Speaking <span class="bg-rose-500/15 text-rose-400 text-[8px] px-1 py-0.2 rounded font-bold uppercase ml-1">New</span></h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">Устная симуляция, аудио-визуализатор и ИИ-анализатор речи.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-400 mt-4">Начать <i class="fas fa-chevron-right text-[9px] group-hover:translate-x-1 transition-transform"></i></span>
+                </div>
+                <!-- Grammar -->
+                <div onclick="initModulePractice('Grammar')" class="module-card cursor-pointer bg-slate-900/30 hover:bg-slate-900/60 border border-slate-900 hover:border-purple-500/40 p-6 rounded-2xl transition-all duration-300 group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-1 group-hover:text-purple-400 transition">Grammar</h3>
+                        <p class="text-slate-500 text-xs leading-relaxed">Сложные грамматические конструкции, идиомы и словарный запас.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-400 mt-4">Начать <i class="fas fa-chevron-right text-[9px] group-hover:translate-x-1 transition-transform"></i></span>
+                </div>
+            </div>
+
+            <!-- Интерактивная зона симулятора -->
+            <div id="module-simulator-area" class="bg-slate-900/20 border border-slate-900 p-8 rounded-3xl">
+                <!-- Окно приветствия / выбора -->
+                <div id="sim-placeholder" class="text-center py-12 text-slate-500 space-y-4">
+                    <div class="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto text-2xl text-slate-400">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-400">Выберите модуль для практики</h3>
+                    <p class="text-sm text-slate-500 max-w-sm mx-auto">Каждое задание представляет собой точную копию реальных вопросов из экзаменационных листов IELTS.</p>
+                </div>
+
+                <!-- БЛОК СТАНДАРТНОГО ТЕСТОВОГО ЗАДАНИЯ (Reading, Listening, Writing, Grammar) -->
+                <div id="sim-standard-quiz" class="hidden space-y-6">
+                    <div class="flex justify-between items-center border-b border-slate-900 pb-4">
+                        <h3 class="text-xl font-bold text-slate-200">Практическое задание: <span id="sim-badge" class="text-indigo-400"></span></h3>
+                        <span id="sim-xp-reward" class="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 text-xs font-bold rounded-lg border border-indigo-500/20"></span>
                     </div>
 
-                    <div id="quiz-container" class="hidden space-y-6">
-                        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                            <p id="quiz-question" class="text-lg font-medium text-slate-200"></p>
-                        </div>
-                        <div id="quiz-options" class="space-y-3">
-                            </div>
-                        <button id="submit-answer-btn" class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white rounded-xl font-medium shadow-lg transition hidden">
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-900">
+                        <p id="sim-question-text" class="text-slate-300 leading-relaxed text-base"></p>
+                    </div>
+
+                    <div id="sim-options-list" class="space-y-3">
+                        <!-- Сюда вставляются кнопки вариантов -->
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-900">
+                        <button id="sim-submit-btn" class="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg transition-all">
                             Проверить ответ
                         </button>
                     </div>
-                </div>
-                
-                <div id="result-box" class="hidden mt-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 flex items-center space-x-3">
-                    <i class="fas fa-check-circle text-xl"></i>
-                    <span id="result-text font-medium"></span>
-                </div>
-            </section>
 
-            <section id="ai-assistant" class="bg-slate-800/40 border border-slate-700/60 p-6 rounded-2xl flex flex-col h-[500px]">
-                <div class="flex items-center space-x-3 pb-4 border-b border-slate-700">
-                    <div class="relative">
-                        <div class="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
-                            <i class="fas fa-robot"></i>
+                    <!-- Контейнер разбора -->
+                    <div id="sim-feedback-box" class="hidden p-6 rounded-2xl">
+                        <!-- Динамический контент разбора через JS -->
+                    </div>
+                </div>
+
+                <!-- БЛОК ЗАДАНИЯ SPEAKING (NEW) -->
+                <div id="sim-speaking-quiz" class="hidden space-y-6">
+                    <div class="flex justify-between items-center border-b border-slate-900 pb-4">
+                        <h3 class="text-xl font-bold text-slate-200">IELTS Speaking Simulator <span class="text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded-lg ml-2 font-normal">Part 2 Cue Card</span></h3>
+                        <span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 text-xs font-bold rounded-lg border border-rose-500/20">+40 XP</span>
+                    </div>
+
+                    <!-- Описание топика карточки -->
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-rose-900/20 space-y-4">
+                        <p class="text-rose-400 font-bold text-xs uppercase tracking-wider">Describe a beautiful place you know in your country:</p>
+                        <ul class="text-slate-300 space-y-1 text-sm list-disc pl-5">
+                            <li>Where this place is</li>
+                            <li>How you can reach there</li>
+                            <li>What you can see and do there</li>
+                            <li>And explain why you think this place is so beautiful.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Панель управления записью -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center bg-slate-950 p-6 rounded-2xl border border-slate-900">
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-sm text-slate-400">Контроль таймингов</h4>
+                            <div class="flex items-center space-x-4">
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 uppercase font-bold">Подготовка (1 мин)</span>
+                                    <span id="prep-timer" class="text-xl font-bold text-indigo-400">01:00</span>
+                                </div>
+                                <div class="w-px h-8 bg-slate-900"></div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-500 uppercase font-bold">Ответ (2 мин)</span>
+                                    <span id="speech-timer" class="text-xl font-bold text-rose-400">02:00</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="startSpeakingPrep()" id="btn-prep" class="px-4 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 rounded-xl text-xs font-bold transition">Начать подготовку</button>
+                                <button onclick="startSpeakingRecord()" id="btn-record" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1"><i class="fas fa-microphone"></i> Включить запись</button>
+                                <button onclick="stopSpeakingRecord()" id="btn-stop" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition hidden">Остановить</button>
+                            </div>
                         </div>
-                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+
+                        <!-- Микрофон визуализатор -->
+                        <div class="flex flex-col items-center justify-center p-4 border border-slate-900 rounded-xl bg-slate-900/20 h-32 relative overflow-hidden">
+                            <!-- Звуковой канвас / fallback анимация -->
+                            <div id="mic-visualizer-sim" class="flex items-center justify-center space-x-1.5 h-12 w-full">
+                                <span class="wave-bar w-1.5 h-4 bg-rose-500 rounded-full" style="animation-delay: 0.1s;"></span>
+                                <span class="wave-bar w-1.5 h-8 bg-rose-400 rounded-full" style="animation-delay: 0.3s;"></span>
+                                <span class="wave-bar w-1.5 h-12 bg-rose-500 rounded-full" style="animation-delay: 0.5s;"></span>
+                                <span class="wave-bar w-1.5 h-6 bg-rose-400 rounded-full" style="animation-delay: 0.2s;"></span>
+                                <span class="wave-bar w-1.5 h-10 bg-rose-500 rounded-full" style="animation-delay: 0.4s;"></span>
+                            </div>
+                            <canvas id="mic-canvas" class="absolute inset-0 w-full h-full hidden opacity-60"></canvas>
+                            <span id="mic-status-label" class="text-[10px] text-slate-500 uppercase tracking-wider font-bold mt-2">Микрофон неактивен</span>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-sm">IELTS LU AI Assistant</h3>
-                        <p class="text-xs text-emerald-400">Онлайн | Готов помочь</p>
+
+                    <!-- ИИ разбор устной речи -->
+                    <div id="speaking-feedback" class="hidden p-6 bg-slate-950 border border-slate-900 rounded-2xl space-y-4">
+                        <div class="flex items-center space-x-2 text-rose-400 font-bold">
+                            <i class="fas fa-robot"></i> <span>Мгновенный анализ ИИ-Тьютора Suluu AI:</span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-900 text-center">
+                                <span class="block text-[10px] text-slate-500 uppercase font-bold">Fluency & Coherence</span>
+                                <span class="text-lg font-extrabold text-slate-200">7.5</span>
+                            </div>
+                            <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-900 text-center">
+                                <span class="block text-[10px] text-slate-500 uppercase font-bold">Lexical Resource</span>
+                                <span class="text-lg font-extrabold text-slate-200">8.0</span>
+                            </div>
+                            <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-900 text-center">
+                                <span class="block text-[10px] text-slate-500 uppercase font-bold">Grammar Accuracy</span>
+                                <span class="text-lg font-extrabold text-slate-200">7.0</span>
+                            </div>
+                            <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-900 text-center">
+                                <span class="block text-[10px] text-slate-500 uppercase font-bold">Pronunciation</span>
+                                <span class="text-lg font-extrabold text-slate-200">8.5</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-400 space-y-2 leading-relaxed pt-2">
+                            <p><strong>Сильные стороны:</strong> Ваша речь была беглой, вы отлично использовали маркеры связности речи (such as, speaking of, absolutely gorgeous). Очень естественное произношение гласных звуков.</p>
+                            <p><strong>Зоны роста:</strong> Была замечена небольшая заминка при поиске академических терминов для описания ландшафта (вместо "very beautiful" лучше использовать "picturesque", "breathtaking", "unspoiled nature"). Подтяните употребление артиклей перед географическими объектами (например: <i>the Issyk-Kul Lake</i>).</p>
+                        </div>
                     </div>
                 </div>
 
-                <div id="chat-box" class="flex-grow overflow-y-auto my-4 space-y-4 pr-2 text-sm">
-                    <div class="bg-slate-800 p-3 rounded-xl rounded-tl-none max-w-[85%] text-slate-300">
-                        Привет! Я твой персональный ИИ-тьютор. Задай мне любой вопрос по IELTS (например: <i>"Как писать эссе?"</i> или <i>"Секреты True/False/Not Given"</i>).
+            </div>
+        </section>
+
+
+        <!-- ВКЛАДКА 3: ОСНОВНОЙ ТЕСТ ДИАГНОСТИКИ БАЛЛА (DIAGNOSTIC TEST) -->
+        <section id="tab-diagnostic" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="space-y-2">
+                <h2 class="text-3xl font-bold tracking-tight accent-font">Основной диагностический тест</h2>
+                <p class="text-slate-400 text-sm">Ответьте на 5 комплексных академических вопросов, чтобы узнать свой предварительный балл IELTS (Band Score) и получить персональный план улучшения знаний.</p>
+            </div>
+
+            <!-- Главный контейнер теста -->
+            <div id="diag-container" class="bg-slate-900/20 border border-slate-900 p-8 rounded-3xl space-y-6">
+                <!-- Прогресс бар теста -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+                        <span>Шаг <span id="diag-current-step">1</span> из 5</span>
+                        <span id="diag-progress-pct">20% Выполнено</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+                        <div id="diag-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300" style="width: 20%;"></div>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2">
-                    <input id="chat-input" type="text" placeholder="Спросить у ИИ..." class="flex-grow bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-slate-100">
-                    <button onclick="sendAiMessage()" class="p-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition">
-                        <i class="fas fa-paper-plane"></i>
+                <!-- Вопросник -->
+                <div class="bg-slate-950 p-6 rounded-2xl border border-slate-900 space-y-3">
+                    <span id="diag-question-category" class="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-indigo-500/20">Reading</span>
+                    <p id="diag-question-text" class="text-slate-200 font-medium text-lg pt-2 leading-relaxed"></p>
+                </div>
+
+                <div id="diag-options-list" class="space-y-3">
+                    <!-- Сюда вставляются варианты ответов в тесте -->
+                </div>
+
+                <div class="flex justify-end pt-4 border-t border-slate-900">
+                    <button onclick="nextDiagQuestion()" id="diag-next-btn" class="px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl font-bold transition-all disabled:opacity-50" disabled>
+                        Следующий вопрос <i class="fas fa-chevron-right ml-1.5 text-xs"></i>
                     </button>
                 </div>
-            </section>
+            </div>
 
-        </div>
+            <!-- Страница результатов теста (скрыта по умолчанию) -->
+            <div id="diag-result-screen" class="hidden bg-slate-900/20 border border-slate-900 p-8 rounded-3xl space-y-8">
+                <div class="text-center space-y-4">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-full text-white text-3xl font-extrabold shadow-xl shadow-indigo-500/15">
+                        <span id="calculated-band">7.5</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-200">Ваш расчетный балл: IELTS Band <span id="calculated-band-title">7.5</span></h3>
+                    <p class="text-slate-400 text-sm max-w-lg mx-auto">Отличный результат! Ваш примерный уровень соответствует академическому уровню сдачи **C1 Advanced**.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-slate-900">
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-slate-300 flex items-center gap-2"><i class="fas fa-clipboard-check text-indigo-400"></i> Результаты анализа ответов</h4>
+                        <div class="space-y-2 text-sm text-slate-400 leading-relaxed">
+                            <p>• <strong>Модули Listening/Reading:</strong> Вы отлично улавливаете скрытый контекст, синонимичные конструкции и быстро перефразируете выражения.</p>
+                            <p>• <strong>Грамматика и Письмо:</strong> Уверенно владеете конструкциями сослагательного наклонения, но стоит обратить внимание на чистоту стиля и избыточные повторения слов.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-slate-300 flex items-center gap-2"><i class="fas fa-list-ol text-pink-400"></i> Ваш персональный план Suluu Prep</h4>
+                        <div class="space-y-2 text-sm text-slate-400 leading-relaxed">
+                            <p>1. <strong>Расширение словарного запаса:</strong> Перейдите от слов C1 к устойчивым коллокациям уровня C2 (например, <i>"profound effect"</i> вместо <i>"big effect"</i>).</p>
+                            <p>2. <strong>Практика устной речи:</strong> Занимайтесь по 15 минут в день в симуляторе Speaking на нашей платформе, отслеживая плавность звуков.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center pt-6">
+                    <button onclick="restartDiagnostic()" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl font-bold text-sm transition">Пройти диагностику заново</button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ВКЛАДКА 4: ИИ-ТЬЮТОР ЧАТ (AI) -->
+        <section id="tab-ai" class="tab-content hidden max-w-4xl mx-auto">
+            <div class="bg-slate-900/20 border border-slate-900 rounded-3xl flex flex-col h-[600px] overflow-hidden">
+                <!-- Шапка чата -->
+                <div class="bg-slate-950 p-6 border-b border-slate-900 flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            <div class="w-11 h-11 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white text-lg font-bold">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-slate-950 rounded-full"></span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-200">Suluu AI Tutor</h3>
+                            <p class="text-xs text-emerald-400 flex items-center gap-1">Онлайн <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block"></span></p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-slate-500 font-medium">IELTS Академический Эксперт</span>
+                </div>
+
+                <!-- Зона сообщений -->
+                <div id="ai-chat-box" class="flex-grow overflow-y-auto p-6 space-y-6 text-sm">
+                    <!-- Стартовое сообщение ИИ -->
+                    <div class="flex items-start gap-3 max-w-[85%]">
+                        <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-indigo-400 shrink-0"><i class="fas fa-robot"></i></div>
+                        <div class="bg-slate-900/50 p-4 rounded-2xl rounded-tl-none border border-slate-900/80 text-slate-300 leading-relaxed space-y-2">
+                            <p>Привет! Я твой персональный ИИ-тьютор на платформе <strong>IELTS Suluu</strong>.</p>
+                            <p>Я могу проанализировать твоё эссе, подсказать топовые идиомы для Speaking, разобрать сложные правила грамматики или составить индивидуальный план занятий.</p>
+                            <p class="text-xs text-slate-500 italic">Попробуй спросить: "Как писать эссе Task 2?" или "Дай шаблоны для Speaking"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Зона ввода -->
+                <div class="p-4 bg-slate-950/50 border-t border-slate-900 flex items-center space-x-3">
+                    <input id="ai-chat-input" type="text" placeholder="Задайте вопрос ИИ-тьютору по IELTS..." class="flex-grow bg-slate-950 border border-slate-900 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-indigo-500 text-slate-100 placeholder:text-slate-600">
+                    <button onclick="sendAiMessage()" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl transition flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/10">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500 bg-slate-950 mt-12">
-        &copy; 2026 IELTS LU. Платформа бесплатного образования. Сделано с умом.
+    <!-- ПОДВАЛ -->
+    <footer class="border-t border-slate-900 py-8 text-center bg-slate-950 text-xs text-slate-600 mt-16 space-y-2">
+        <p>&copy; 2026 IELTS Suluu. Все права защищены. Подготовка к будущему с красивыми технологиями.</p>
+        <p class="text-[10px] text-slate-700">Проект разработан для бесплатного эффективного обучения всех желающих сдать международный экзамен IELTS.</p>
     </footer>
 
+    <!-- ЛОГИКА ВЕБ-ПРИЛОЖЕНИЯ (JAVASCRIPT) -->
     <script>
-        // Глобальное состояние пользователя
-        let totalScore = 0;
+        // Инициализация переменных пользователя
+        let xpScore = 0;
         let activeModule = "";
-        let selectedOptionIndex = null;
+        let selectedOptionIdx = null;
 
-        // База данных тренировочных вопросов
+        // База данных обычных секционных тренировок
         const tasksDatabase = {
             Reading: {
-                question: "В тексте сказано: 'The local government decided to fund the renewable energy project in 2021, despite initial budget cuts.' \n\nВопрос (True / False / Not Given): 'The project received immediate financial support without any obstacles.'",
-                options: ["True (Верно)", "False (Неверно)", "Not Given (Не указано)"],
-                correct: 1, // False
+                question: "Read the excerpt: 'While early critics dismissed virtual reality as a passing gimmick, modern neuroscientists claim its immersive nature has profound psychological implications.' \n\nQuestion (True / False / Not Given): 'Early critics believed virtual reality was only a temporary trend.'",
+                options: ["True", "False", "Not Given"],
+                correct: 0, // True (passing gimmick = temporary trend)
                 xp: 20,
-                explanation: "Неверно (False), потому что в тексте упоминаются первоначальные сокращения бюджета ('despite initial budget cuts'), что означает наличие финансовых трудностей на старте."
+                explanation: "Правильно (True). Фраза 'dismissed virtual reality as a passing gimmick' означает, что ранние критики считали технологию временной уловкой / преходящим трендом."
             },
             Listening: {
-                question: "Прослушайте фрагмент (симуляция записи): 'You can collect your entry tickets at the main gate, but remember, the event starts at a quarter to seven.' \n\nВ какое время начинается мероприятие?",
-                options: ["06:15", "06:45", "07:15", "07:45"],
-                correct: 1, // 06:45
+                question: "Simulation Transcript: 'We will meet in the faculty lounge on the third floor of the library, right after the main lecture ends at three-thirty.' \n\nQuestion: Where will the meeting take place and when?",
+                options: [
+                    "Library lounge, at 3:15",
+                    "Faculty lounge inside the library, right after 3:30",
+                    "The main lecture hall, at 3:30"
+                ],
+                correct: 1,
                 xp: 20,
-                explanation: "'A quarter to seven' переводится как 'четверть до семи', то есть без пятнадцати семь (06:45)."
+                explanation: "Правильно! Запись указывает на 'faculty lounge' в библиотеке, встреча начнется сразу по завершении лекции в 15:30 ('after the main lecture ends at three-thirty')."
             },
             Writing: {
-                question: "Какое вводное слово лучше всего использовать в Task 2 для демонстрации контраста на высший балл (Band 7-8)?",
-                options: ["But", "On the other hand", "By contrast", "On the flip side"],
-                correct: 2, // By contrast
+                question: "Which cohesive device is most appropriate to present a counter-argument and maintain a highly academic tone (Band 7.5+)?",
+                options: [
+                    "On the other hand (B2)",
+                    "Albeit (C2)",
+                    "Nevertheless (C1)"
+                ],
+                correct: 2, // Nevertheless
                 xp: 30,
-                explanation: "'By contrast' является академическим коннектором высокого уровня (C1/C2), идеально подходящим для IELTS Academic Writing."
+                explanation: "Правильно! 'Nevertheless' (Тем не менее / Всё же) — это классический академический коннектор высокого регистра, превосходно связывающий противоположные суждения."
             },
             Grammar: {
-                question: "Выберите грамматически верное предложение для выражения нереального условия в прошлом (Third Conditional):",
+                question: "Choose the grammatically correct sentence structure for predicting hypothetical future outcomes in academic essays:",
                 options: [
-                    "If I studied harder, I would pass the IELTS exam.",
-                    "If I had studied harder, I would have passed the IELTS exam.",
-                    "If I would have studied harder, I had passed the IELTS exam."
+                    "Should the government invest in technology, the economic output would rise.",
+                    "If the government will invest in technology, the economic output rises.",
+                    "Had the government invest in technology, the output would rise."
                 ],
-                correct: 1, 
+                correct: 0, // Should the government... (Inversion in 1st Conditional)
                 xp: 15,
-                explanation: "Third Conditional строится по схеме: If + Past Perfect, ... would have + V3. Это подчеркивает упущенную возможность в прошлом."
+                explanation: "Отлично! Вариант с инверсией ('Should the government invest...') заменяет стандартную структуру 'If the government invests' и придает эссе необходимую академическую утонченность."
             }
         };
 
-        // Запуск практического модуля
-        function startPractice(moduleName) {
+        // База данных вопросов диагностического теста
+        const diagnosticQuestions = [
+            {
+                category: "Listening Comprehension",
+                text: "Transcript excerpt: 'We initially estimated around forty delegates, but sixty-five registered, forcing us to upgrade to the grand auditorium.' \n\nHow many people registered for the event?",
+                options: ["40 delegates", "65 delegates", "105 delegates"],
+                correct: 1
+            },
+            {
+                category: "Reading & Vocabulary",
+                text: "Sentence: 'The researcher’s thesis was completely undermined by the newly published dataset.' \n\nWhat is the synonym of 'undermined' in this academic context?",
+                options: ["Supported", "Weakened", "Postponed"],
+                correct: 1
+            },
+            {
+                category: "Grammar: Advanced Inversion",
+                text: "Complete the academic statement: 'Seldom ______ such high temperature fluctuations in this geographical region.'",
+                options: ["we have observed", "have we observed", "did we observed"],
+                correct: 1
+            },
+            {
+                category: "Writing Cohesion & Style",
+                text: "Identify the best sentence to open a paragraph representing a cause-and-effect argument in Task 2 writing:",
+                options: [
+                    "A notable consequence of urbanization is the depletion of green zones.",
+                    "Urbanization makes green zones go away really fast.",
+                    "People like cities, so trees are cut down as a consequence."
+                ],
+                correct: 0
+            },
+            {
+                category: "Speaking Strategies: Fillers",
+                text: "Which of the following phrases is recommended to buy time for thinking during the Speaking Part 3 without losing fluency points?",
+                options: [
+                    "Ummm... I don't know, maybe...",
+                    "That is a highly intriguing question, and to be perfectly frank, I haven't given it deep thought before, but...",
+                    "Please wait, let me think for a moment."
+                ],
+                correct: 1
+            }
+        ];
+
+        let diagCurrentIndex = 0;
+        let diagScore = 0;
+        let diagSelectedOption = null;
+
+        // РОУТИНГ ПРИЛОЖЕНИЯ (TABS)
+        function showTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            // Показываем нужную вкладку
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            // Убираем активные стили навигации
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('text-indigo-400', 'font-bold');
+                link.classList.add('text-slate-400');
+            });
+            // Ставим активные стили на нужную кнопку
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('text-indigo-400', 'font-bold');
+                activeBtn.classList.remove('text-slate-400');
+            }
+        }
+
+        // ИНИЦИАЛИЗАЦИЯ ИНТЕРАКТИВНОГО КВИЗА
+        function initModulePractice(moduleName) {
             activeModule = moduleName;
-            selectedOptionIndex = null;
-            
-            // Обновляем бейдж модуля
-            const badge = document.getElementById('current-module-badge');
-            badge.innerText = moduleName;
-            
-            // Переключаем видимость блоков
-            document.getElementById('welcome-practice-msg').classList.add('hidden');
-            document.getElementById('result-box').classList.add('hidden');
-            document.getElementById('quiz-container').classList.remove('hidden');
-            
-            // Рендерим вопрос
+            selectedOptionIdx = null;
+
+            document.getElementById('sim-placeholder').classList.add('hidden');
+            document.getElementById('sim-speaking-quiz').classList.add('hidden');
+            document.getElementById('sim-standard-quiz').classList.remove('hidden');
+
             const task = tasksDatabase[moduleName];
-            document.getElementById('quiz-question').innerText = task.question;
-            
-            // Рендерим варианты ответов
-            const optionsContainer = document.getElementById('quiz-options');
+            document.getElementById('sim-badge').innerText = moduleName;
+            document.getElementById('sim-xp-reward').innerText = `+${task.xp} XP`;
+            document.getElementById('sim-question-text').innerText = task.question;
+
+            // Скрываем разбор
+            document.getElementById('sim-feedback-box').classList.add('hidden');
+            document.getElementById('sim-submit-btn').classList.remove('hidden');
+
+            // Генерация опций
+            const optionsContainer = document.getElementById('sim-options-list');
             optionsContainer.innerHTML = '';
-            
-            task.options.forEach((option, index) => {
+            task.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left p-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition flex items-center space-x-3 option-btn";
-                btn.innerHTML = `<span class="w-6 h-6 flex items-center justify-center rounded-full bg-slate-900 border border-slate-600 text-xs text-slate-400 index-label">${String.fromCharCode(65 + index)}</span> <span>${option}</span>`;
-                btn.onclick = () => selectOption(index, btn);
+                btn.className = "w-full text-left p-4 bg-slate-950 hover:bg-slate-900 border border-slate-900 rounded-xl transition flex items-center space-x-3 sim-opt-btn";
+                btn.innerHTML = `<span class="w-6 h-6 flex items-center justify-center rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-500 index-lbl font-bold">${String.fromCharCode(65 + idx)}</span> <span class="text-sm font-medium">${opt}</span>`;
+                btn.onclick = () => selectSimOption(idx, btn);
                 optionsContainer.appendChild(btn);
             });
 
-            document.getElementById('submit-answer-btn').classList.remove('hidden');
-            
-            // Скролл к симулятору для удобства мобильных юзеров
-            document.getElementById('simulator').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('module-simulator-area').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Выбор варианта ответа
-        function selectOption(index, buttonElement) {
-            selectedOptionIndex = index;
-            // Сбрасываем стили со всех кнопок в текущем тесте
-            const allButtons = document.querySelectorAll('.option-btn');
-            allButtons.forEach(btn => {
-                btn.classList.remove('border-indigo-500', 'bg-indigo-950/40');
-                btn.querySelector('.index-label').classList.remove('bg-indigo-600', 'text-white');
+        function selectSimOption(idx, btnEl) {
+            selectedOptionIdx = idx;
+            document.querySelectorAll('.sim-opt-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+                btn.querySelector('.index-lbl').classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
             });
-            // Подсвечиваем выбранную
-            buttonElement.classList.add('border-indigo-500', 'bg-indigo-950/40');
-            buttonElement.querySelector('.index-label').classList.add('bg-indigo-600', 'text-white');
+            btnEl.classList.add('border-indigo-500', 'bg-indigo-950/20');
+            btnEl.querySelector('.index-lbl').classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
         }
 
-        // Проверка ответа и начисление очков
-        document.getElementById('submit-answer-btn').onclick = function() {
-            if (selectedOptionIndex === null) {
-                alert("Пожалуйста, выберите один из вариантов ответа!");
+        // КНОПКА ПРОВЕРКИ СТАНДАРТНОГО ОТВЕТА
+        document.getElementById('sim-submit-btn').onclick = function() {
+            if (selectedOptionIdx === null) {
+                alert("Выберите ответ перед подтверждением!");
                 return;
             }
 
             const task = tasksDatabase[activeModule];
-            const resultBox = document.getElementById('result-box');
-            const submitBtn = document.getElementById('submit-answer-btn');
-            
-            submitBtn.classList.add('hidden');
-            resultBox.classList.remove('hidden');
+            const feedbackBox = document.getElementById('sim-feedback-box');
+            this.classList.add('hidden');
+            feedbackBox.classList.remove('hidden');
 
-            if (selectedOptionIndex === task.correct) {
-                // Успешный ответ
-                totalScore += task.xp;
-                document.getElementById('user-score').innerText = totalScore;
-                
-                resultBox.className = "mt-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 space-y-2";
-                resultBox.innerHTML = `
-                    <div class="flex items-center space-x-2 font-bold">
-                        <i class="fas fa-check-circle"></i> <span>Правильно! +${task.xp} XP начислено.</span>
+            if (selectedOptionIdx === task.correct) {
+                // Правильный ответ
+                addXp(task.xp);
+                feedbackBox.className = "p-6 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl space-y-2";
+                feedbackBox.innerHTML = `
+                    <div class="flex items-center space-x-2 font-bold text-sm">
+                        <i class="fas fa-check-circle"></i> <span>Великолепно! Правильный ответ. Получено +${task.xp} XP</span>
                     </div>
-                    <p class="text-sm text-slate-300 mt-1">${task.explanation}</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">${task.explanation}</p>
                 `;
             } else {
-                // Ошибка
-                resultBox.className = "mt-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 space-y-2";
-                resultBox.innerHTML = `
-                    <div class="flex items-center space-x-2 font-bold">
-                        <i class="fas fa-times-circle"></i> <span>Неправильно. Попробуйте еще раз или изучите разбор ниже.</span>
+                // Неправильный ответ
+                feedbackBox.className = "p-6 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl space-y-2";
+                feedbackBox.innerHTML = `
+                    <div class="flex items-center space-x-2 font-bold text-sm">
+                        <i class="fas fa-times-circle"></i> <span>Ошибка. Ознакомьтесь с разбором:</span>
                     </div>
-                    <p class="text-sm text-slate-300 mt-1"><strong>Разбор:</strong> ${task.explanation}</p>
+                    <p class="text-xs text-slate-400 leading-relaxed">${task.explanation}</p>
                 `;
             }
         };
 
-        // СИМУЛЯЦИЯ РАБОТЫ ИИ-ПОМОЩНИКА
+        // НАЧАТЬ SPEAKING СИМУЛЯТОР
+        function initSpeakingPractice() {
+            document.getElementById('sim-placeholder').classList.add('hidden');
+            document.getElementById('sim-standard-quiz').classList.add('hidden');
+            document.getElementById('sim-speaking-quiz').classList.remove('hidden');
+
+            // Ресет таймеров
+            stopSpeakingRecord();
+            document.getElementById('prep-timer').innerText = "01:00";
+            document.getElementById('speech-timer').innerText = "02:00";
+            document.getElementById('speaking-feedback').classList.add('hidden');
+
+            document.getElementById('module-simulator-area').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Таймеры и Микрофон
+        let prepTimerInterval, speechTimerInterval;
+        let audioContext, analyser, streamSource, animationFrameId;
+
+        function startSpeakingPrep() {
+            let duration = 60;
+            const display = document.getElementById('prep-timer');
+            clearInterval(prepTimerInterval);
+            
+            document.getElementById('btn-prep').classList.add('opacity-50');
+            
+            prepTimerInterval = setInterval(() => {
+                let minutes = parseInt(duration / 60, 10);
+                let seconds = parseInt(duration % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.innerText = minutes + ":" + seconds;
+
+                if (--duration < 0) {
+                    clearInterval(prepTimerInterval);
+                    display.innerText = "00:00";
+                    startSpeakingRecord(); // Автозапуск записи после подготовки
+                }
+            }, 1000);
+        }
+
+        // Запись звука с реальным микрофоном
+        async function startSpeakingRecord() {
+            clearInterval(prepTimerInterval);
+            document.getElementById('btn-record').classList.add('hidden');
+            document.getElementById('btn-stop').classList.remove('hidden');
+            document.getElementById('mic-status-label').innerText = "Идёт запись голоса...";
+            document.getElementById('mic-status-label').classList.replace('text-slate-500', 'text-rose-500');
+
+            // Запускаем таймер ответа
+            let duration = 120;
+            const display = document.getElementById('speech-timer');
+            clearInterval(speechTimerInterval);
+
+            speechTimerInterval = setInterval(() => {
+                let minutes = parseInt(duration / 60, 10);
+                let seconds = parseInt(duration % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.innerText = minutes + ":" + seconds;
+
+                if (--duration < 0) {
+                    clearInterval(speechTimerInterval);
+                    display.innerText = "00:00";
+                    stopSpeakingRecord();
+                }
+            }, 1000);
+
+            // Инициализация микрофона (Web Audio API)
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const canvas = document.getElementById('mic-canvas');
+                const visualizerSim = document.getElementById('mic-visualizer-sim');
+                
+                canvas.classList.remove('hidden');
+                visualizerSim.classList.add('hidden');
+
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                streamSource = audioContext.createMediaStreamSource(stream);
+                streamSource.connect(analyser);
+
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                const ctx = canvas.getContext('2d');
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                function draw() {
+                    animationFrameId = requestAnimationFrame(draw);
+                    analyser.getByteFrequencyData(dataArray);
+
+                    ctx.fillStyle = '#090d16';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    const barWidth = (canvas.width / bufferLength) * 2.5;
+                    let barHeight;
+                    let x = 0;
+
+                    for(let i = 0; i < bufferLength; i++) {
+                        barHeight = dataArray[i]/1.8;
+
+                        // Цвет градиента волны
+                        ctx.fillStyle = `rgb(${barHeight+150}, 40, 100)`;
+                        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+                        x += barWidth + 2;
+                    }
+                }
+                draw();
+
+            } catch (err) {
+                console.log("Доступ к реальному микрофону не предоставлен. Использован симулятор звуковой волны.");
+                // Оставляем дефолтную пульсирующую анимацию, если нет микрофона
+            }
+        }
+
+        function stopSpeakingRecord() {
+            clearInterval(speechTimerInterval);
+            clearInterval(prepTimerInterval);
+            
+            document.getElementById('btn-record').classList.remove('hidden');
+            document.getElementById('btn-stop').classList.add('hidden');
+            document.getElementById('btn-prep').classList.remove('opacity-50');
+            document.getElementById('mic-status-label').innerText = "Запись остановлена";
+            document.getElementById('mic-status-label').classList.replace('text-rose-500', 'text-slate-500');
+
+            // Скрываем canvas микрофона и возвращаем симуляцию
+            document.getElementById('mic-canvas').classList.add('hidden');
+            document.getElementById('mic-visualizer-sim').classList.remove('hidden');
+
+            if (audioContext) {
+                audioContext.close();
+            }
+            cancelAnimationFrame(animationFrameId);
+
+            // Показываем разбор ИИ
+            document.getElementById('speaking-feedback').classList.remove('hidden');
+            addXp(40);
+        }
+
+        // ФУНКЦИОНАЛ ДИАГНОСТИЧЕСКОГО ТЕСТА
+        function startDiagnostic() {
+            diagCurrentIndex = 0;
+            diagScore = 0;
+            diagSelectedOption = null;
+
+            document.getElementById('diag-container').classList.remove('hidden');
+            document.getElementById('diag-result-screen').classList.add('hidden');
+
+            renderDiagQuestion();
+        }
+
+        function renderDiagQuestion() {
+            const currentQ = diagnosticQuestions[diagCurrentIndex];
+            
+            // Сброс кнопки перехода
+            document.getElementById('diag-next-btn').setAttribute('disabled', 'true');
+            diagSelectedOption = null;
+
+            // Рендер текста
+            document.getElementById('diag-current-step').innerText = diagCurrentIndex + 1;
+            document.getElementById('diag-progress-pct').innerText = `${(diagCurrentIndex + 1) * 20}% Выполнено`;
+            document.getElementById('diag-progress-bar').style.width = `${(diagCurrentIndex + 1) * 20}%`;
+
+            document.getElementById('diag-question-category').innerText = currentQ.category;
+            document.getElementById('diag-question-text').innerText = currentQ.text;
+
+            // Рендер вариантов
+            const optionsBox = document.getElementById('diag-options-list');
+            optionsBox.innerHTML = '';
+
+            currentQ.options.forEach((option, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 bg-slate-950 hover:bg-slate-900 border border-slate-900 rounded-xl transition flex items-center space-x-3 diag-opt-btn";
+                btn.innerHTML = `<span class="w-6 h-6 flex items-center justify-center rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-500 diag-idx font-bold">${String.fromCharCode(65 + idx)}</span> <span class="text-sm font-medium">${option}</span>`;
+                btn.onclick = () => selectDiagOption(idx, btn);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectDiagOption(idx, btnEl) {
+            diagSelectedOption = idx;
+            document.querySelectorAll('.diag-opt-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-950/20');
+                btn.querySelector('.diag-idx').classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+            });
+            btnEl.classList.add('border-indigo-500', 'bg-indigo-950/20');
+            btnEl.querySelector('.diag-idx').classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+
+            document.getElementById('diag-next-btn').removeAttribute('disabled');
+        }
+
+        function nextDiagQuestion() {
+            const currentQ = diagnosticQuestions[diagCurrentIndex];
+            
+            if (diagSelectedOption === currentQ.correct) {
+                diagScore++;
+            }
+
+            diagCurrentIndex++;
+
+            if (diagCurrentIndex < diagnosticQuestions.length) {
+                renderDiagQuestion();
+            } else {
+                showDiagResults();
+            }
+        }
+
+        function showDiagResults() {
+            document.getElementById('diag-container').classList.add('hidden');
+            document.getElementById('diag-result-screen').classList.remove('hidden');
+
+            let finalBand = 3.5;
+            let levelTitle = "Pre-Intermediate (A2)";
+            if (diagScore === 5) { finalBand = 8.5; levelTitle = "Expert User (C2)"; }
+            else if (diagScore === 4) { finalBand = 7.5; levelTitle = "Advanced (C1)"; }
+            else if (diagScore === 3) { finalBand = 6.5; levelTitle = "Competent User (B2)"; }
+            else if (diagScore === 2) { finalBand = 5.5; levelTitle = "Modest User (B1)"; }
+            else if (diagScore === 1) { finalBand = 4.5; levelTitle = "Extremely Modest User"; }
+
+            // Начисления и вывод
+            addXp(100);
+            document.getElementById('calculated-band').innerText = finalBand;
+            document.getElementById('calculated-band-title').innerText = finalBand + " — " + levelTitle;
+            
+            // Запись в глобальную панель приборов
+            document.getElementById('stat-level').innerText = levelTitle;
+            document.getElementById('stat-band').innerText = finalBand + " / 9.0";
+        }
+
+        function restartDiagnostic() {
+            startDiagnostic();
+        }
+
+
+        // СИСТЕМА УВЕЛИЧЕНИЯ СЧЕТА (XP)
+        function addXp(amount) {
+            xpScore += amount;
+            document.getElementById('user-score').innerText = xpScore;
+            document.getElementById('stat-xp').innerText = xpScore + " XP";
+        }
+
+
+        // ИИ-ТЬЮТОР ЧАТ ЛОГИКА
         function sendAiMessage() {
-            const input = document.getElementById('chat-input');
+            const input = document.getElementById('ai-chat-input');
             const query = input.value.trim();
             if (!query) return;
 
-            const chatBox = document.getElementById('chat-box');
+            const chatBox = document.getElementById('ai-chat-box');
 
-            // Сообщение пользователя
+            // Рендер сообщения пользователя
             const userMsg = document.createElement('div');
-            userMsg.className = "bg-indigo-600 p-3 rounded-xl rounded-tr-none max-w-[85%] text-white ml-auto text-right";
-            userMsg.innerText = query;
+            userMsg.className = "flex items-start gap-3 max-w-[80%] ml-auto justify-end";
+            userMsg.innerHTML = `
+                <div class="bg-indigo-600/90 text-slate-100 p-4 rounded-2xl rounded-tr-none text-right">
+                    ${query}
+                </div>
+            `;
             chatBox.appendChild(userMsg);
-
             input.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Ответ ИИ (эмуляция умных ответов через таймаут)
+            // Ответ ИИ
             setTimeout(() => {
                 const aiMsg = document.createElement('div');
-                aiMsg.className = "bg-slate-800 p-3 rounded-xl rounded-tl-none max-w-[85%] text-slate-300";
+                aiMsg.className = "flex items-start gap-3 max-w-[85%]";
                 
-                let answer = "Отличный вопрос! Для сдачи IELTS на высокий балл, рекомендую делать акцент на регулярной практике и анализе своих ошибок. С чего начнем обучение сегодня?";
+                let answer = "Я внимательно изучил ваш вопрос по подготовке к IELTS. Для детального разбора этой темы рекомендую запустить симуляторы Reading или Speaking на вкладке 'Секции'. Чем конкретно мы займёмся сейчас?";
                 
-                // Простые триггеры для симуляции интеллекта
                 const lowerQuery = query.toLowerCase();
-                if (lowerQuery.includes("эссе") || lowerQuery.includes("writing")) {
-                    answer = "В IELTS Writing Task 2 очень важна структура: \n1. Introduction (Парафраз + Твой стейтмент) \n2. Body Paragraph 1 (Аргумент + Пример) \n3. Body Paragraph 2 (Контраргумент/Второй плюс) \n4. Conclusion. Используй меньше простых слов вроде 'good' или 'bad' — замени их на 'beneficial' или 'detrimental'.";
-                } else if (lowerQuery.includes("reading") || lowerQuery.includes("читать")) {
-                    answer = "Главный секрет IELTS Reading — не читай весь текст досконально! Используй технику Skimming (беглый просмотр для понимания сути) и Scanning (поиск конкретных ключевых слов и дат из вопроса).";
-                } else if (lowerQuery.includes("listening") || lowerQuery.includes("слушать")) {
-                    answer = "В секции Listening всегда внимательно читай инструкцию: если написано 'NO MORE THAN TWO WORDS', три слова уже будут ошибкой. Также следи за окончаниями множественного числа (-s), из-за них часто теряют баллы.";
+                
+                if (lowerQuery.includes("эссе") || lowerQuery.includes("writing") || lowerQuery.includes("письмо")) {
+                    answer = `<strong>Правила написания IELTS Writing Task 2 (Band 7.5+):</strong><br><br>
+                    1. <strong>Структура строго в 4 параграфа:</strong><br>
+                    - <i>Introduction:</i> Парафраз темы + четкий Thesis Statement (ваше мнение).<br>
+                    - <i>Body 1:</i> Первый аргумент, его пояснение и яркий пример.<br>
+                    - <i>Body 2:</i> Второй аргумент/контраргумент и объяснение.<br>
+                    - <i>Conclusion:</i> Перефразированный вывод вашего Thesis statement (без новых мыслей!).<br><br>
+                    2. <strong>Лайфхак по словарю:</strong> Избегайте повторений. Заменяйте простые выражения (например, вместо 'more and more people' используйте 'an increasing proportion of society').`;
+                } else if (lowerQuery.includes("speaking") || lowerQuery.includes("разговор") || lowerQuery.includes("шаблон")) {
+                    answer = `<strong>Стратегия прохождения IELTS Speaking Part 2 (Cue Card):</strong><br><br>
+                    • <strong>Используйте 1 минуту подготовки с умом:</strong> Запишите только ключевые слова (verbs/adjectives), не пишите предложениями.<br>
+                    • <strong>Fluency over accuracy:</strong> На экзамене беглость важнее мелких ошибок. Не делайте долгих пауз, используйте вводные маркеры времени (<i>"If my memory serves me right...", "As a matter of fact..."</i>).<br>
+                    • Чтобы улучшить устный ответ, попробуйте интерактивный <strong>Speaking Simulator</strong> во вкладке 'Секции' нашего сайта IELTS Suluu!`;
+                } else if (lowerQuery.includes("reading") || lowerQuery.includes("чтение")) {
+                    answer = `<strong>Секреты успеха в IELTS Reading:</strong><br><br>
+                    1. <strong>Skimming:</strong> Бегло просмотрите текст за 1-2 минуты, чтобы понять его общую структуру и посыл автора.<br>
+                    2. <strong>Scanning:</strong> Ищите конкретные даты, имена, термины по ключевым словам из вопроса.<br>
+                    3. <strong>Помните про синонимы:</strong> Вопрос никогда не повторяет текст дословно. Если в вопросе написано 'demolished', в тексте вы увидите 'pulled down'.`;
+                } else if (lowerQuery.includes(" listening") || lowerQuery.includes("слушать")) {
+                    answer = `<strong>Основные ловушки в IELTS Listening:</strong><br><br>
+                    • <strong>Дистракторы:</strong> Спикер на записи может исправить себя в последний момент (<i>"We will meet at 4 o'clock... oh sorry, let's make it 4:30"</i>).<br>
+                    • <strong>Spelling:</strong> Тренируйте написание сложных названий улиц и имен по буквам. Ошибка в одной букве означает нулевой балл за весь вопрос.`;
+                } else if (lowerQuery.includes("привет") || lowerQuery.includes("hello") || lowerQuery.includes("hi")) {
+                    answer = "Рад приветствовать тебя на IELTS Suluu! Как проходит твоя подготовка к экзамену? Задавай любые академические вопросы или протестируй свой уровень прямо на панели тестирования.";
                 }
 
-                aiMsg.innerHTML = answer.replace(/\n/g, "<br>");
+                aiMsg.innerHTML = `
+                    <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-indigo-400 shrink-0"><i class="fas fa-robot"></i></div>
+                    <div class="bg-slate-900/50 p-4 rounded-2xl rounded-tl-none border border-slate-900/80 text-slate-300 leading-relaxed">
+                        ${answer}
+                    </div>
+                `;
                 chatBox.appendChild(aiMsg);
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 800);
+            }, 750);
         }
 
-        // Позволяет отправлять сообщения в чат ИИ по нажатию клавиши Enter
-        document.getElementById('chat-input').addEventListener('keypress', function (e) {
+        // Отправка ИИ-сообщений по клавише Enter
+        document.getElementById('ai-chat-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendAiMessage();
             }
         });
+
+        // Запуск базовой структуры при старте
+        window.onload = function() {
+            showTab('dashboard');
+            startDiagnostic();
+        };
     </script>
 </body>
 </html>
